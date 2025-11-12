@@ -53,5 +53,15 @@
 <hr>
 <br>
 
+<form action="ch02/users" method="get">
+    <label>GET user</label>
+    <input type="text" name="username" placeholder="username">
+    <button type="submit">GET 요청 보내기</button>
+</form>
+
+<br>
+<hr>
+<br>
+
 </body>
 </html>
