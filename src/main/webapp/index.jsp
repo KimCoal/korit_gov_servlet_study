@@ -63,5 +63,24 @@
 <hr>
 <br>
 
+<form action="ch02/todo" method="post">
+    <label>POST todo</label><br>
+    <input type="text" name="title" placeholder="title"><br>
+    <input type="text" name="content" placeholder="content"><br>
+    <input type="text" name="username" placeholder="username"><br>
+    <button type="submit">POST 요청 보내기</button>
+</form>
+
+<br>
+<hr>
+<br>
+
+<form action="ch02/todo" method="get">
+    <label>GET todo</label>
+    <input type="text" name="title" placeholder="title">
+    <button type="submit">GET 요청 보내기</button>
+</form>
+
+
 </body>
 </html>
