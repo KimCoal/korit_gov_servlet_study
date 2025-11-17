@@ -65,8 +65,7 @@ public class UserServlet extends HttpServlet {
 
         resp.setContentType("application/json");
 
-        // ValidFilter에서 미리 검증하고 넣어둔 DTO 사용
-        SignUpReqDto signUpReqDto = (SignUpReqDto) req.getAttribute("signUpReqDto");
+        SignUpReqDto signUpReqDto = new SignUpReqDto();
 
         // username 중복 확인
         if (userService.isDuplicatedUsername(signUpReqDto.getUsername())) {
