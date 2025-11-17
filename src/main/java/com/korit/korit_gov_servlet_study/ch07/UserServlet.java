@@ -15,13 +15,15 @@ import java.util.List;
 public class UserServlet extends HttpServlet {
 
     private UserService userService;
+    private SignUpReqDto signUpReqDto;
     private Gson gson;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        this.userService = UserService.getInstance();
-        this.gson = new GsonBuilder().create();
+        userService = UserService.getInstance();
+        gson = new GsonBuilder().create();
+        signUpReqDto = new SignUpReqDto();
     }
 
     // GET: username 있으면 단건, 없으면 전체
@@ -40,9 +42,9 @@ public class UserServlet extends HttpServlet {
                     .message("전체 유저 조회 성공")
                     .body(users)
                     .build();
-
+            String json = gson.toJson(responseDto);
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write(gson.toJson(responseDto));
+            resp.getWriter().write(gson.toJson(json));
         } else {
             // 단건 조회
             User user = userService.findByUsername(username);
@@ -53,8 +55,9 @@ public class UserServlet extends HttpServlet {
                     .body(user)
                     .build();
 
+            String json = gson.toJson(responseDto);
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write(gson.toJson(responseDto));
+            resp.getWriter().write(gson.toJson(json));
         }
     }
 
@@ -62,10 +65,9 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+        SignUpReqDto signUpReqDto = gson.fromJson(req.getReader(), SignUpReqDto.class);
 
         resp.setContentType("application/json");
-
-        SignUpReqDto signUpReqDto = new SignUpReqDto();
 
         // username 중복 확인
         if (userService.isDuplicatedUsername(signUpReqDto.getUsername())) {
