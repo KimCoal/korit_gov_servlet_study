@@ -13,9 +13,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class User {
-    private Long userId;
+    private Integer userId;
     private String username;
     private String password;
     private Integer age;
+    @JsonFormat(pattern = "YYYY-MM-dd kk:mm:ss")
     private LocalDateTime createDt;
 }
