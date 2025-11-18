@@ -18,7 +18,6 @@ import java.util.Optional;
 
 @WebServlet("/ch08/user")
 public class UserServlet extends HttpServlet {
-
     private UserService userService;
     private ObjectMapper objectMapper;
 
@@ -26,59 +25,66 @@ public class UserServlet extends HttpServlet {
     public void init() throws ServletException {
         userService = UserService.getInstance();
         objectMapper = new ObjectMapper();
+//        objectMapper.registerModule()
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //전체조회, username 조회, keyword 조회
+        //파라미터가 없으면 전체 조회, username 파라미터가 있으면 username 조회,
+        //keyword가 있으면 keyword 조회
         String username = req.getParameter("username");
         String keyword = req.getParameter("keyword");
         ApiRespDto<?> apiRespDto = null;
         if (username != null) {
-            // username 조회
+            //username 조회
             Optional<User> foundUser = userService.findByUsername(username);
             if (foundUser.isPresent()) {
                 apiRespDto = ApiRespDto.<User>builder()
                         .status("success")
-                        .message(username + "회원 조회 완료")
+                        .message(username + ": 회원 조회 완료")
                         .body(foundUser.get())
+                        .build();
+            } else {
+                apiRespDto = ApiRespDto.<User>builder()
+                        .status("failed")
+                        .message(username + ": 해당하는 회원이 존재하지 않습니다.")
+                        .body(null)
                         .build();
             }
         } else if (keyword != null) {
-            // 키워드 조회
+            //keyword 조회
         } else {
-            // 전체 조회
+            //전체조회
         }
+
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json");
-
-        // 1. JSON → DTO 변환
-        SignUpReqDto signUpReqDto = objectMapper.readValue(req.getReader(), SignUpReqDto.class);
-
-        ApiRespDto<?> apiRespDto;
-
-        // 2. username 중복 검사
-        if (userService.isDuplicatedUsername(signUpReqDto.getUsername())) {
+        //body json을 가져오면 dto로 변환해서 username중복검사 한 후 서비스에 전달 후 db에 추가
+        //1. body json가져오기 => dto변환 (json에서 변환하려면 Gson 필요)
+        SignUpReqDto signupReqDto = objectMapper.readValue(req.getReader(), SignUpReqDto.class);
+        //2. dto의 username을 중복검사 => 서비스에서 중복인지 아닌지 판단 메소드
+        ApiRespDto<?> apiRespDto = null;
+        if (userService.isDuplicatedUsername(signupReqDto.getUsername())) {
             apiRespDto = ApiRespDto.<String>builder()
                     .status("failed")
-                    .message(signUpReqDto.getUsername() + "은 이미 사용중인 username입니다.")
-                    .body(signUpReqDto.getUsername())
+                    .message(signupReqDto.getUsername() + "은 이미 사용중인 username 입니다.")
+                    .body(signupReqDto.getUsername())
                     .build();
-
         } else {
-            // 3. DB insert
-            User savedUser = userService.addUser(signUpReqDto);
-
+            //3. 추가하기
+            //추가하려면 userService 추가 메소드 필요
+            User user = userService.addUser(signupReqDto);
             apiRespDto = ApiRespDto.<User>builder()
                     .status("success")
-                    .message("회원가입 완료")
-                    .body(savedUser)
+                    .message("정상적으로 회원가입이 되었습니다.")
+                    .body(user)
                     .build();
         }
-
-        // 4. 응답 출력
+        //4. 응답보내기
         objectMapper.writeValue(resp.getWriter(), apiRespDto);
     }
+
 }

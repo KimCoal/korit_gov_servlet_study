@@ -18,22 +18,22 @@ public class UserDao {
         }
         return instance;
     }
-
+    //user추가
     public User addUser(User user) {
-        String sql = "INSERT INTO user_tb(username, password, age, create_dt) VALUES (?,?,?,now())";
-
-        try (Connection con = ConnectionFactory.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        String sql = "insert into user_tb(user_id, username, password, age, create_dt) values (0, ?, ?, ?, now())";
+        try (
+                Connection con = ConnectionFactory.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        ) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
             ps.setInt(3, user.getAge());
 
-            ps.executeUpdate();
-
-            try (ResultSet rs = ps.getGeneratedKeys()) {
+            ps.execute();
+            try(ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    user.setUserId(rs.getLong(1));
+                    Integer userId = rs.getInt(1);
+                    user.setUserId(userId);
                 }
             }
 
@@ -41,30 +41,31 @@ public class UserDao {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
+    //username으로 유저찾기
     public Optional<User> findByUsername(String username) {
-        String sql = "SELECT * FROM user_tb WHERE username = ?";
+        String sql = "select user_id, username, password, age, create_dt from user_tb where username = ?";
 
-        try (Connection con = ConnectionFactory.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)
+        try (
+                Connection con = ConnectionFactory.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql);
         ) {
             ps.setString(1, username);
-
-            try (ResultSet rs = ps.executeQuery()) {
+            try(ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? Optional.of(toUser(rs)) : Optional.empty();
             }
-
         } catch (SQLException e) {
+            e.printStackTrace();
             return Optional.empty();
         }
     }
 
     public User toUser(ResultSet resultSet) throws SQLException {
         return User.builder()
-                .userId(resultSet.getLong("user_id"))
+                .userId(resultSet.getInt("user_id"))
                 .username(resultSet.getString("username"))
                 .password(resultSet.getString("password"))
                 .age(resultSet.getInt("age"))

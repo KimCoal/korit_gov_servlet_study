@@ -1,5 +1,6 @@
 package com.korit.korit_gov_servlet_study.ch08.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
